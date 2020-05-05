@@ -39,12 +39,13 @@ function Jogada() {
 
     AtualizarMostrador();
     let jogadas = ObterJogadasTabuleiro()
-    VerificarVencedor(jogadas)
+    if (VerificarVencedor(jogadas))
+        gameOver = true;
 }
 
 function ObterJogadasTabuleiro() {
     let espacos = [];
-    for(let espaco of document.getElementsByClassName("espaco")){
+    for (let espaco of document.getElementsByClassName("espaco")) {
         espacos.push(espaco.getAttribute("jogada"));
     }
     return espacos;
@@ -59,6 +60,7 @@ function VerificarVencedor(tabuleiro) {
             vencedor = tabuleiro[element[0] - 1];
             alert(`O jogador ${vencedor} ganhou!`)
         }
-
     });
+
+    return vencedor;
 }
