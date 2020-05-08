@@ -2,22 +2,10 @@ const player1 = "x";
 const player2 = "o";
 const imagemPlayer1 = "<img src='imagens/x.jpg'>";
 const imagemPlayer2 = "<img src='imagens/o.jpg'>";
-let playerTime = player1;
 let gameOver = false;
 let casosSucesso = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 
-AtualizarMostrador();
 OnClickEspaco();
-
-function AtualizarMostrador() {
-    if (gameOver) return;
-
-    let player = document.querySelectorAll("div#mostrador img")[0];
-    if (playerTime == player1)
-        player.setAttribute("src", "imagens/x.jpg");
-    else
-        player.setAttribute("src", "imagens/o.jpg");
-}
 
 function OnClickEspaco() {
     var espacos = document.getElementsByClassName("espaco");
@@ -30,17 +18,19 @@ function Jogada() {
     if (gameOver || this.getElementsByTagName("img").length > 0) return;
 
     JogadaHumano(this);
-    AtualizarMostrador();
 
     let tabuleiro = ObterJogadasTabuleiro();
-    MinMax(tabuleiro, player1, "min", 0);
+    let jogadaIa = MinMax(tabuleiro, player1, "min", 0).espaco;
 
     tabuleiro = ObterJogadasTabuleiro();
     let vencedor = VerificarVencedor(tabuleiro);
     if (vencedor) {
         alert(`O jogador ${vencedor.toUpperCase()} ganhou!`);
         gameOver = true;
+    }else {
+        JogadaIa(jogadaIa);
     }
+
 }
 
 function ObterJogadasTabuleiro() {
@@ -116,10 +106,10 @@ function ObterEspacosVazios(tabuleiro) {
     return espacosVazios;
 }
 
-function MinMax(tabuleiro, player, minMax, nivel) {
+function MinMax(tabuleiro, player, minMax, nivel, espaco) {
     nivel++;
     let espacosVazios = ObterEspacosVazios(tabuleiro)
-    if (nivel == 4 || VerificarVencedor(tabuleiro) != "") {
+    if (nivel == 4 || VerificarVencedor(tabuleiro) != "") { // Quando for folha
         return RetornarFolha(tabuleiro, player);
     }
 
@@ -128,23 +118,21 @@ function MinMax(tabuleiro, player, minMax, nivel) {
     let minMaxFactory = MinMaxFactory(minMax);
 
     for (const i of espacosVazios) {
+        espaco = i;
         let proximoTabuleiro = [...tabuleiro];
         proximoTabuleiro.splice(i, 1, player);
 
-        let valorNo = MinMax(proximoTabuleiro, player, minMax, nivel);
-        
-        if (!valorNo.folha && nivel != 1 && Poda(minMaxFactory, valorNo.valorFuncaoUtilidade)){
-            if(minMaxFactory.valor == -Infinity)
+        let valorNo = MinMax(proximoTabuleiro, player, minMax, nivel, i);
+
+        if (!valorNo.folha && nivel != 1 && Poda(minMaxFactory, valorNo.valorFuncaoUtilidade)) {
+            if (minMaxFactory.valor == -Infinity)
                 minMaxFactory.espaco = i;
             break;
         }
         minMaxFactory.Comparar(valorNo.valorFuncaoUtilidade, i);
     }
 
-    if (nivel == 1) {
-        JogadaIa(minMaxFactory.espaco);
-    }
-    return RetornarMelhorValorDosFilhos(minMaxFactory.valor);
+    return RetornarMelhorValorDosFilhos(minMaxFactory.valor, minMaxFactory.espaco);
 }
 
 function MinMaxFactory(minMax) {
@@ -190,16 +178,18 @@ function MaxFactory() {
     return max;
 }
 
-function RetornarFolha(tabuleiro, player) {
+function RetornarFolha(tabuleiro, player, espaco) {
     return {
         valorFuncaoUtilidade: FuncaoDeUtilidade(tabuleiro, player),
+        espaco,
         folha: true
     };
 }
 
-function RetornarMelhorValorDosFilhos(valor) {
+function RetornarMelhorValorDosFilhos(valor, espaco) {
     return {
         valorFuncaoUtilidade: valor,
+        espaco,
         folha: false
     };
 }
