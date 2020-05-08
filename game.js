@@ -21,6 +21,7 @@ function Jogada() {
 
     let tabuleiro = ObterJogadasTabuleiro();
     let jogadaIa = MinMax(tabuleiro, player1, "min", 0).espaco;
+    JogadaIa(jogadaIa);
 
     tabuleiro = ObterJogadasTabuleiro();
     let vencedor = VerificarVencedor(tabuleiro);
@@ -28,7 +29,7 @@ function Jogada() {
         alert(`O jogador ${vencedor.toUpperCase()} ganhou!`);
         gameOver = true;
     }else {
-        JogadaIa(jogadaIa);
+        DeuVelha(tabuleiro);
     }
 
 }
@@ -48,6 +49,8 @@ function JogadaHumano(container) {
 
 function JogadaIa(espacoIndex) {
     let espaco = document.getElementsByClassName("espaco")[espacoIndex];
+    if(!espaco) return;
+
     espaco.setAttribute("jogada", player2);
     espaco.innerHTML = imagemPlayer2;
 }
@@ -77,6 +80,11 @@ function FuncaoDeUtilidade(tabuleiro) {
     });
 
     return chancePlayer2 - chancePlayer1;
+}
+
+function DeuVelha(tabuleiro) {
+    if(!tabuleiro.includes(""))
+        alert(`Deu velha! \n Ninguem ganhou`);
 }
 
 function VerificarSeHaVitoriaNaLinha(tabuleiro, linha, player) {
@@ -109,7 +117,7 @@ function ObterEspacosVazios(tabuleiro) {
 function MinMax(tabuleiro, player, minMax, nivel, espaco) {
     nivel++;
     let espacosVazios = ObterEspacosVazios(tabuleiro)
-    if (nivel == 4 || VerificarVencedor(tabuleiro) != "") { // Quando for folha
+    if (nivel == 4 || espacosVazios.length == 0 || VerificarVencedor(tabuleiro) != "") { // Quando for folha
         return RetornarFolha(tabuleiro, player);
     }
 
@@ -118,7 +126,6 @@ function MinMax(tabuleiro, player, minMax, nivel, espaco) {
     let minMaxFactory = MinMaxFactory(minMax);
 
     for (const i of espacosVazios) {
-        espaco = i;
         let proximoTabuleiro = [...tabuleiro];
         proximoTabuleiro.splice(i, 1, player);
 
