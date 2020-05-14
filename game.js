@@ -114,7 +114,7 @@ function ObterEspacosVazios(tabuleiro) {
     return espacosVazios;
 }
 
-function MinMax(tabuleiro, player, minMax, nivel, espaco) {
+function MinMax(tabuleiro, player, minMax, nivel) {
     nivel++;
     let espacosVazios = ObterEspacosVazios(tabuleiro)
     if (nivel == 4 || espacosVazios.length == 0 || VerificarVencedor(tabuleiro) != "") { // Quando for folha
